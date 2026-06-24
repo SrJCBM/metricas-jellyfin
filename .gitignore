@@ -18,7 +18,8 @@ CLAUDE.md
 # Exports de sesiones de Claude/Codex
 *.txt
 
-# Screenshots de desarrollo
+# Screenshots de desarrollo. La carpeta screenshots/ se publica porque se usa
+# en el README.
 current-app.png
 design-prototype.png
 updated-app.png

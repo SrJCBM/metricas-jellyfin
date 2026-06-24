@@ -4,7 +4,7 @@ Dashboard web local para monitorear un servidor [Jellyfin](https://jellyfin.org/
 
 El foco principal del panel es mostrar **qué está consumiendo Jellyfin**, separando las métricas del proceso `jellyfin.exe` de las métricas globales del equipo. El backend está escrito en Python y el frontend usa HTML, CSS y JavaScript vanilla, sin build tools ni frameworks.
 
-![Vista general](final-overview.png)
+![Vista general](screenshots/with-artwork.png)
 
 ## Características
 
@@ -21,9 +21,9 @@ El foco principal del panel es mostrar **qué está consumiendo Jellyfin**, sepa
 
 ## Capturas
 
-| Resumen | Sesiones | Estado |
-|---|---|---|
-| ![Resumen](final-overview.png) | ![Sesiones](final-sessions.png) | ![Estado](final-status.png) |
+| Resumen | Sesión con artwork | Sesiones | Estado |
+|---|---|---|---|
+| ![Resumen](screenshots/final-overview.png) | ![Artwork](screenshots/with-artwork.png) | ![Sesiones](screenshots/final-sessions.png) | ![Estado](screenshots/final-status.png) |
 
 ## Requisitos
 
@@ -35,7 +35,7 @@ El foco principal del panel es mostrar **qué está consumiendo Jellyfin**, sepa
 ## Instalación
 
 ```powershell
-git clone https://github.com/TU_USUARIO/metricas-jellyfin.git
+git clone https://github.com/SrJCBM/metricas-jellyfin.git
 cd metricas-jellyfin
 
 python -m venv .venv
@@ -149,33 +149,6 @@ tests/
 .env.example             Plantilla de configuración
 requirements.txt         Dependencias Python
 ```
-
-## Crear el repositorio
-
-La carpeta actual todavía debe inicializarse como repo Git si no lo hiciste:
-
-```powershell
-cd "C:\Users\jcbla\Documents\GitHub\Metricas Jellyfin"
-git init
-git add .
-git commit -m "Initial Jellyfin Monitor dashboard"
-```
-
-Luego crea un repositorio vacío en GitHub y conecta el remoto:
-
-```powershell
-git branch -M main
-git remote add origin https://github.com/TU_USUARIO/metricas-jellyfin.git
-git push -u origin main
-```
-
-Antes de publicar, confirma que `.env` no esté incluido:
-
-```powershell
-git status --short
-```
-
-`.env` debe estar ignorado por `.gitignore`.
 
 ## Notas
 
