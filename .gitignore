@@ -1,0 +1,24 @@
+# Configuracion local: contiene API key.
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+
+# Herramientas internas y artefactos de trabajo
+.claude/
+.playwright-mcp/
+Claude design/
+web/CLAUDE.md
+CLAUDE.md
+
+# Exports de sesiones de Claude/Codex
+*.txt
+
+# Screenshots de desarrollo
+current-app.png
+design-prototype.png
+updated-app.png

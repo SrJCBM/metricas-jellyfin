@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Jellyfin Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">JM</div>
+          <div>
+            <h1>Jellyfin Monitor</h1>
+            <p id="server-url">Conectando...</p>
+          </div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <nav class="nav" aria-label="Secciones">
+          <button class="nav-btn active" data-view="overview">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+            Resumen
+          </button>
+          <button class="nav-btn" data-view="sessions">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="1" y="2" width="14" height="3" rx="1.5"/><rect x="1" y="7" width="14" height="3" rx="1.5"/><rect x="1" y="12" width="14" height="3" rx="1.5"/></svg>
+            Sesiones
+          </button>
+          <button class="nav-btn" data-view="system">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="3" width="10" height="10" rx="2"/><rect x="6.4" y="6.4" width="3.2" height="3.2" rx="0.6" fill="currentColor" stroke="none"/></svg>
+            Sistema
+          </button>
+          <button class="nav-btn" data-view="status">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="2.3" fill="currentColor" stroke="none"/></svg>
+            Estado
+          </button>
+        </nav>
+
+        <div class="side-status">
+          <div class="side-status-label">Servidor</div>
+          <div class="side-status-row">
+            <span class="status-dot" id="sidebar-dot"></span>
+            <span class="side-status-text" id="sidebar-status-text">Conectando</span>
+          </div>
+          <div class="side-status-version mono" id="sidebar-version">--</div>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <h2 id="view-title">Resumen</h2>
+            <p class="topbar-sub" id="view-subtitle">Consumo del proceso Jellyfin en tiempo real</p>
+          </div>
+          <div class="top-actions">
+            <div class="pill" id="server-pill">
+              <span class="pill-dot" id="pill-dot"></span>
+              <span id="pill-label">API</span>
+            </div>
+            <div class="clock-wrap">
+              <span class="clock-label">Hora</span>
+              <span class="clock mono" id="clock">--:--:--</span>
+            </div>
+          </div>
+        </header>
+
+        <section class="view active" id="overview-view">
+          <div class="cards" id="summary-cards"></div>
+          <div class="cards" id="metric-cards"></div>
+
+          <div class="overview-bottom">
+            <div class="chart-panels" id="chart-panels"></div>
+
+            <article class="panel session-panel">
+              <div class="session-panel-head">
+                <span class="panel-title">Sesión activa</span>
+                <span class="session-state-badge" id="session-state-badge"></span>
+              </div>
+              <div id="featured-session" class="featured-empty">Sin sesiones activas</div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="sessions-view">
+          <div class="sessions-bar">
+            <span class="status-dot green-dot"></span>
+            <span id="sessions-summary" class="sessions-summary-text">Sin datos</span>
+          </div>
+          <div id="sessions-list" class="session-list"></div>
+        </section>
+
+        <section class="view" id="system-view">
+          <div class="grid two">
+            <article class="panel accent-panel">
+              <div class="accent-panel-head">
+                <span class="accent-bar" style="background:var(--purple)"></span>
+                <div>
+                  <div class="panel-title">Host · Sistema</div>
+                  <div class="panel-sub">Métricas globales del equipo</div>
+                </div>
+              </div>
+              <div class="metric-list" id="system-metrics"></div>
+            </article>
+            <article class="panel accent-panel">
+              <div class="accent-panel-head">
+                <span class="accent-bar" style="background:var(--teal)"></span>
+                <div class="flex-grow">
+                  <div class="panel-title">Proceso Jellyfin</div>
+                  <div class="panel-sub">Solo el proceso</div>
+                </div>
+                <span class="process-badge">no incluye el sistema</span>
+              </div>
+              <div class="metric-list" id="server-metrics"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="status-view">
+          <div class="health-chips" id="health-chips"></div>
+          <div class="grid status-grid">
+            <article class="panel">
+              <div class="panel-head-simple">Configuración</div>
+              <div class="kv-list" id="config-list"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-head-simple">Alertas</div>
+              <div id="alerts-list" class="alert-list"></div>
+            </article>
+            <article class="panel events-panel">
+              <div class="panel-head-simple">Eventos recientes</div>
+              <div id="events-list" class="events-list"></div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
