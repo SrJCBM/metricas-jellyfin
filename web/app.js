@@ -266,15 +266,17 @@ function renderSessions(jellyfin) {
   const sessions = jellyfin.sessions || [];
   const counts = jellyfin.counts || { active: 0, paused: 0, direct: 0, transcoding: 0 };
 
-  state.lastSessions = sessions;
-  state.featuredIndex = Math.min(state.featuredIndex, Math.max(0, sessions.length - 1));
+  state.lastSessions = [...sessions].sort((a, b) =>
+    `${a.user}${a.device}`.localeCompare(`${b.user}${b.device}`)
+  );
+  state.featuredIndex = Math.min(state.featuredIndex, Math.max(0, state.lastSessions.length - 1));
   renderFeatured();
 
   $("#sessions-summary").textContent =
     `${sessions.length} sesiones · ${counts.active} activas · ${counts.transcoding} transcoding`;
 
-  $("#sessions-list").innerHTML = sessions.length
-    ? sessions.map((s) => sessionCard(s, false)).join("")
+  $("#sessions-list").innerHTML = state.lastSessions.length
+    ? state.lastSessions.map((s) => sessionCard(s, false)).join("")
     : `<div class="featured-empty">Sin sesiones activas</div>`;
 }
 
