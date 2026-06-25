@@ -417,6 +417,36 @@ canvas {
   color: var(--text);
 }
 
+.carousel-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.carousel-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font: 600 18px 'Sora', sans-serif;
+  line-height: 1;
+  padding: 1px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.carousel-btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.carousel-pos {
+  font: 500 11px 'JetBrains Mono', monospace;
+  color: var(--muted);
+  min-width: 32px;
+  text-align: center;
+}
+
 .session-state-badge {
   display: flex;
   align-items: center;
@@ -812,6 +842,35 @@ canvas {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
+}
+
+.export-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.export-label {
+  font: 500 11px 'Sora', sans-serif;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-right: 4px;
+}
+
+.export-btn {
+  font: 500 11px 'JetBrains Mono', monospace;
+  color: var(--teal);
+  background: rgba(79, 209, 181, 0.08);
+  border: 1px solid rgba(79, 209, 181, 0.2);
+  border-radius: 6px;
+  padding: 4px 11px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.export-btn:hover {
+  background: rgba(79, 209, 181, 0.16);
 }
 
 .health-chip {

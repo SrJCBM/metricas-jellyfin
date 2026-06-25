@@ -79,6 +79,11 @@
             <article class="panel session-panel">
               <div class="session-panel-head">
                 <span class="panel-title">Sesión activa</span>
+                <div class="carousel-nav" id="carousel-nav" style="display:none">
+                  <button class="carousel-btn" id="carousel-prev">&#8249;</button>
+                  <span class="carousel-pos mono" id="carousel-pos">1 / 1</span>
+                  <button class="carousel-btn" id="carousel-next">&#8250;</button>
+                </div>
                 <span class="session-state-badge" id="session-state-badge"></span>
               </div>
               <div id="featured-session" class="featured-empty">Sin sesiones activas</div>
@@ -122,6 +127,11 @@
 
         <section class="view" id="status-view">
           <div class="health-chips" id="health-chips"></div>
+          <div class="export-bar">
+            <span class="export-label">Exportar historial</span>
+            <a class="export-btn" href="/api/export/csv?minutes=30" download>↓ 30 min</a>
+            <a class="export-btn" href="/api/export/csv?minutes=60" download>↓ 60 min</a>
+          </div>
           <div class="grid status-grid">
             <article class="panel">
               <div class="panel-head-simple">Configuración</div>

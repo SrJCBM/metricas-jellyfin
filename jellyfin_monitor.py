@@ -10,6 +10,8 @@ Configuracion:
 
 from __future__ import annotations
 
+import csv
+import io
 import json
 import os
 import socket
@@ -22,7 +24,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 import psutil
 import requests
@@ -46,6 +48,17 @@ except Exception:
 BASE_DIR = Path(__file__).resolve().parent
 WEB_DIR = BASE_DIR / "web"
 HISTORY_POINTS = 90
+EXPORT_MAXLEN = 1800  # ~60 min a 2 s por poll
+
+CSV_COLUMNS = [
+    "hora",
+    "cpu_pct", "ram_pct", "disco_pct",
+    "disco_lectura_mbs", "disco_escritura_mbs",
+    "red_bajada_mbs", "red_subida_mbs",
+    "gpu_pct", "gpu_temp_c",
+    "jf_cpu_pct", "jf_ram_mb", "jf_disco_lectura_mbs",
+    "stream_mbps", "sesiones", "transcoding",
+]
 
 
 def load_env_file(path: Path) -> None:
@@ -182,6 +195,7 @@ class MetricsCollector:
 
         self.lock = threading.Lock()
         self.events: deque[dict[str, str]] = deque(maxlen=50)
+        self.export_log: deque[dict[str, Any]] = deque(maxlen=EXPORT_MAXLEN)
         self.last_error: dict[str, float] = {}
         self.last_success: str | None = None
         self._prev_session_keys: dict[str, str] = {}
@@ -219,6 +233,26 @@ class MetricsCollector:
 
             alerts = self._alerts(system, process, gpu, jellyfin)
             cards = self._summary_cards(system, process, gpu, jellyfin, latency_ms)
+
+            self.export_log.append({
+                "ts": time.time(),
+                "hora": now_label(),
+                "cpu_pct": round(system["cpu"]["percent"], 1),
+                "ram_pct": round(system["ram"]["percent"], 1),
+                "disco_pct": round(system["disk"]["percent"], 1),
+                "disco_lectura_mbs": round(system["diskRead"]["bytes"] / 1024 ** 2, 3),
+                "disco_escritura_mbs": round(system["diskWrite"]["bytes"] / 1024 ** 2, 3),
+                "red_bajada_mbs": round(system["netDown"]["bytes"] / 1024 ** 2, 3),
+                "red_subida_mbs": round(system["netUp"]["bytes"] / 1024 ** 2, 3),
+                "gpu_pct": round(gpu["util"]["percent"], 1) if gpu.get("available") else "",
+                "gpu_temp_c": gpu["temp"]["value"] if gpu.get("available") else "",
+                "jf_cpu_pct": round(process["cpu"]["percent"], 1) if process.get("running") else "",
+                "jf_ram_mb": round(process["ram"]["privateBytes"] / 1024 ** 2, 1) if process.get("running") else "",
+                "jf_disco_lectura_mbs": round(process["diskRead"]["bytes"] / 1024 ** 2, 3) if process.get("running") else "",
+                "stream_mbps": round(jellyfin["traffic"]["mbps"], 2),
+                "sesiones": jellyfin["counts"]["active"],
+                "transcoding": jellyfin["counts"]["transcoding"],
+            })
 
             return {
                 "config": {
@@ -473,7 +507,7 @@ class MetricsCollector:
 
         current_keys: dict[str, str] = {}
         for s in parsed:
-            key = f"{s['user']}|{s['itemId']}"
+            key = f"{s['user']}|{s['itemId']}|{s['device']}"
             label = s["title"] + (f" · {s['subtitle']}" if s.get("subtitle") else "")
             current_keys[key] = label
         for key, label in current_keys.items():
@@ -680,6 +714,14 @@ class MonitorHandler(BaseHTTPRequestHandler):
             item_id = parsed.path.rsplit("/", 1)[-1].strip()
             self._send_jellyfin_image(item_id)
             return
+        if parsed.path == "/api/export/csv":
+            qs = parse_qs(parsed.query)
+            try:
+                minutes = max(1, min(int(qs.get("minutes", ["60"])[0]), 120))
+            except (ValueError, IndexError):
+                minutes = 60
+            self._send_csv(minutes)
+            return
 
         relative = "index.html" if parsed.path in {"/", ""} else parsed.path.lstrip("/")
         target = WEB_DIR / relative
@@ -744,6 +786,30 @@ class MonitorHandler(BaseHTTPRequestHandler):
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", content_type)
         self.send_header("Cache-Control", "private, max-age=300")
+        self.send_header("Content-Length", str(len(body)))
+        self._send_security_headers()
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _send_csv(self, minutes: int) -> None:
+        with collector.lock:
+            rows = list(collector.export_log)
+        cutoff = time.time() - minutes * 60
+        rows = [r for r in rows if r["ts"] >= cutoff]
+        if not rows:
+            self.send_error(HTTPStatus.NO_CONTENT)
+            return
+        out = io.StringIO()
+        writer = csv.DictWriter(out, fieldnames=CSV_COLUMNS, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(rows)
+        # utf-8-sig agrega BOM para que Excel reconozca el encoding sin configuración
+        body = out.getvalue().encode("utf-8-sig")
+        filename = f"jellyfin-{datetime.now().strftime('%Y-%m-%d-%H-%M')}.csv"
+        self.send_response(HTTPStatus.OK)
+        self.send_header("Content-Type", "text/csv; charset=utf-8")
+        self.send_header("Content-Disposition", f'attachment; filename="{filename}"')
+        self.send_header("Cache-Control", "no-store")
         self.send_header("Content-Length", str(len(body)))
         self._send_security_headers()
         self.end_headers()

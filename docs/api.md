@@ -1,6 +1,6 @@
 # API Reference
 
-El backend expone tres endpoints HTTP, todos con `GET`.
+El backend expone cuatro endpoints HTTP, todos con `GET`.
 
 ---
 
@@ -270,6 +270,51 @@ Proxy que descarga la portada primaria de un ítem de Jellyfin y la sirve al nav
 - Responde con `image/jpeg` o `image/png` con `Cache-Control: private, max-age=300`
 - Devuelve `404` si el ítem no existe o no tiene portada
 - Devuelve `400` si el `itemId` contiene caracteres inválidos (`/ \ ? &`)
+
+---
+
+## `GET /api/export/csv`
+
+Descarga el historial de métricas acumulado en memoria como archivo CSV. El navegador abre el diálogo de guardar archivo directamente.
+
+### Parámetros
+
+| Parámetro | Tipo | Default | Descripción |
+|---|---|---|---|
+| `minutes` | int | `60` | Minutos hacia atrás a exportar (mín. 1, máx. 120) |
+
+Ejemplo: `/api/export/csv?minutes=30`
+
+### Respuesta
+
+- **Content-Type**: `text/csv; charset=utf-8`
+- **Content-Disposition**: `attachment; filename="jellyfin-YYYY-MM-DD-HH-MM.csv"`
+- Devuelve `204 No Content` si no hay datos aún (el monitor acaba de iniciar)
+
+### Columnas del CSV
+
+| Columna | Unidad | Descripción |
+|---|---|---|
+| `hora` | HH:MM:SS | Hora del registro |
+| `cpu_pct` | % | CPU global del host |
+| `ram_pct` | % | RAM global del host |
+| `disco_pct` | % | Uso del disco del host |
+| `disco_lectura_mbs` | MB/s | Lectura de disco del host |
+| `disco_escritura_mbs` | MB/s | Escritura de disco del host |
+| `red_bajada_mbs` | MB/s | Tráfico de red entrante |
+| `red_subida_mbs` | MB/s | Tráfico de red saliente |
+| `gpu_pct` | % | Uso de GPU (vacío si no disponible) |
+| `gpu_temp_c` | °C | Temperatura de GPU (vacío si no disponible) |
+| `jf_cpu_pct` | % | CPU del proceso Jellyfin (vacío si no corre) |
+| `jf_ram_mb` | MB | RAM privada del proceso Jellyfin |
+| `jf_disco_lectura_mbs` | MB/s | Lectura de disco del proceso Jellyfin |
+| `stream_mbps` | Mbps | Bitrate total estimado de sesiones activas |
+| `sesiones` | — | Número de sesiones activas |
+| `transcoding` | — | Número de sesiones en transcoding |
+
+El archivo incluye BOM UTF-8 para compatibilidad directa con Microsoft Excel.
+
+El buffer en memoria guarda hasta 1800 muestras (~60 minutos a 2 s de intervalo). Con intervalos más cortos, el buffer cubre menos tiempo.
 
 ---
 

@@ -2,6 +2,8 @@ const state = {
   view: "overview",
   refreshMs: 2000,
   timer: null,
+  featuredIndex: 0,
+  lastSessions: [],
 };
 
 const charts = {
@@ -226,19 +228,23 @@ function sessionCard(session, featured = false) {
     </div>`;
 }
 
-function renderSessions(jellyfin) {
-  const sessions = jellyfin.sessions || [];
-  const counts = jellyfin.counts || { active: 0, paused: 0, direct: 0, transcoding: 0 };
+function renderFeatured() {
+  const sessions = state.lastSessions;
+  const idx = state.featuredIndex;
+  const total = sessions.length;
 
-  $("#sessions-summary").textContent =
-    `${sessions.length} sesiones · ${counts.active} activas · ${counts.transcoding} transcoding`;
+  const nav = $("#carousel-nav");
+  if (nav) nav.style.display = total > 1 ? "flex" : "none";
+
+  const posEl = $("#carousel-pos");
+  if (posEl) posEl.textContent = `${idx + 1} / ${total}`;
 
   const badge = $("#session-state-badge");
   if (badge) {
-    if (sessions.length) {
-      const first = sessions[0];
-      badge.textContent = first.paused ? "Pausa" : "Reproduciendo";
-      badge.className = `session-state-badge ${first.paused ? "pause" : "play"}`;
+    if (total > 0) {
+      const s = sessions[idx];
+      badge.textContent = s.paused ? "Pausa" : "Reproduciendo";
+      badge.className = `session-state-badge ${s.paused ? "pause" : "play"}`;
     } else {
       badge.textContent = "";
       badge.className = "session-state-badge";
@@ -246,13 +252,26 @@ function renderSessions(jellyfin) {
   }
 
   const featuredEl = $("#featured-session");
-  if (sessions.length) {
-    featuredEl.innerHTML = sessionCard(sessions[0], true);
+  if (!featuredEl) return;
+  if (total > 0) {
+    featuredEl.innerHTML = sessionCard(sessions[idx], true);
     featuredEl.className = "";
   } else {
     featuredEl.innerHTML = "Sin sesiones activas";
     featuredEl.className = "featured-empty";
   }
+}
+
+function renderSessions(jellyfin) {
+  const sessions = jellyfin.sessions || [];
+  const counts = jellyfin.counts || { active: 0, paused: 0, direct: 0, transcoding: 0 };
+
+  state.lastSessions = sessions;
+  state.featuredIndex = Math.min(state.featuredIndex, Math.max(0, sessions.length - 1));
+  renderFeatured();
+
+  $("#sessions-summary").textContent =
+    `${sessions.length} sesiones · ${counts.active} activas · ${counts.transcoding} transcoding`;
 
   $("#sessions-list").innerHTML = sessions.length
     ? sessions.map((s) => sessionCard(s, false)).join("")
@@ -504,6 +523,19 @@ function drawChart(canvas, values, config) {
 }
 
 $$(".nav-btn").forEach((btn) => btn.addEventListener("click", () => setView(btn.dataset.view)));
+
+$("#carousel-prev").addEventListener("click", () => {
+  if (state.featuredIndex > 0) {
+    state.featuredIndex--;
+    renderFeatured();
+  }
+});
+$("#carousel-next").addEventListener("click", () => {
+  if (state.featuredIndex < state.lastSessions.length - 1) {
+    state.featuredIndex++;
+    renderFeatured();
+  }
+});
 
 window.addEventListener("resize", () => {
   fetch("/api/metrics", { cache: "no-store" })
