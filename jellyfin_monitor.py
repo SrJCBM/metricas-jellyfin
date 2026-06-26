@@ -677,6 +677,8 @@ class MetricsCollector:
             alerts.append("Jellyfin no respondio completamente.")
         if not process.get("running"):
             alerts.append("Proceso jellyfin.exe no encontrado.")
+        if not MEDIA_PATH.exists():
+            alerts.append(f"Unidad multimedia no detectada: {MEDIA_PATH}.")
         if system["cpu"]["percent"] >= 90:
             alerts.append(f"CPU alta: {system['cpu']['label']}.")
         if system["ram"]["percent"] >= 90:
