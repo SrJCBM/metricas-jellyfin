@@ -215,8 +215,46 @@ button, input, textarea { font: inherit; }
 .top-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
+
+.pause-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.pause-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+
+.pause-btn[aria-pressed="true"] {
+  background: rgba(230, 177, 94, 0.08);
+  border-color: rgba(230, 177, 94, 0.3);
+  color: var(--amber);
+}
+
+.refresh-select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font: 500 11px 'JetBrains Mono', monospace;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.refresh-select:hover { color: var(--text); border-color: rgba(255,255,255,0.14); }
 
 .pill {
   display: flex;
@@ -1058,4 +1096,12 @@ canvas {
   .health-chips { grid-template-columns: 1fr 1fr; }
 
   .topbar { flex-direction: column; align-items: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

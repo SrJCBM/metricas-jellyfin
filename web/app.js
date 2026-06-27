@@ -4,6 +4,7 @@ const state = {
   timer: null,
   featuredIndex: 0,
   lastSessions: [],
+  paused: false,
 };
 
 const charts = {
@@ -80,7 +81,7 @@ function setView(view) {
 
 function scheduleNext() {
   clearTimeout(state.timer);
-  state.timer = setTimeout(fetchMetrics, state.refreshMs);
+  if (!state.paused) state.timer = setTimeout(fetchMetrics, state.refreshMs);
 }
 
 async function fetchMetrics() {
@@ -98,10 +99,18 @@ async function fetchMetrics() {
 function render(data) {
   state.refreshMs = data.config?.refreshMs || state.refreshMs;
 
+  const activeCount = data.jellyfin?.counts?.active || 0;
+  const online = !!data.jellyfin?.online;
+  document.title = activeCount > 0
+    ? `[${activeCount} sesión${activeCount !== 1 ? "es" : ""}] Jellyfin Monitor`
+    : online ? "Jellyfin Monitor" : "[Offline] Jellyfin Monitor";
+
+  const sel = $("#refresh-select");
+  if (sel && document.activeElement !== sel) sel.value = String(state.refreshMs);
+
   $("#server-url").textContent = data.config?.url || "--";
   $("#clock").textContent = data.time || "--:--:--";
 
-  const online = !!data.jellyfin?.online;
   const statusLabel = data.jellyfin?.status || "API";
 
   // Topbar pill
@@ -435,6 +444,7 @@ function renderStatus(data) {
 }
 
 function renderFetchError(error) {
+  document.title = "[OFFLINE] Jellyfin Monitor";
   const pill = $("#server-pill");
   pill.className = "pill warn";
   $("#pill-label").textContent = "Monitor offline";
@@ -533,6 +543,31 @@ function drawChart(canvas, values, config) {
 }
 
 $$(".nav-btn").forEach((btn) => btn.addEventListener("click", () => setView(btn.dataset.view)));
+
+$("#pause-btn").addEventListener("click", () => {
+  state.paused = !state.paused;
+  const btn = $("#pause-btn");
+  btn.setAttribute("aria-pressed", String(state.paused));
+  btn.setAttribute("aria-label", state.paused ? "Reanudar actualización" : "Pausar actualización");
+  btn.querySelector("svg").innerHTML = state.paused
+    ? `<polygon points="4,2 13,8 4,14" fill="currentColor"/>`
+    : `<rect x="3" y="2" width="4" height="12" rx="1" fill="currentColor"/><rect x="9" y="2" width="4" height="12" rx="1" fill="currentColor"/>`;
+  if (!state.paused) fetchMetrics();
+});
+
+$("#refresh-select").addEventListener("change", (e) => {
+  const ms = parseInt(e.target.value, 10);
+  const prev = state.refreshMs;
+  state.refreshMs = ms;
+  fetch("/api/config", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refreshMs: ms }),
+  }).catch(() => {
+    state.refreshMs = prev;
+    e.target.value = String(prev);
+  });
+});
 
 $("#carousel-prev").addEventListener("click", () => {
   if (state.featuredIndex > 0) {

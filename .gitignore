@@ -1,6 +1,9 @@
 # Configuracion local: contiene API key.
 .env
 
+# Historial de métricas generado en tiempo de ejecución.
+jellyfin_monitor_history.json
+
 # Python
 __pycache__/
 *.pyc

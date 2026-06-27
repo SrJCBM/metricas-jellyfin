@@ -58,6 +58,18 @@
             <p class="topbar-sub" id="view-subtitle">Consumo del proceso Jellyfin en tiempo real</p>
           </div>
           <div class="top-actions">
+            <button class="pause-btn" id="pause-btn" aria-label="Pausar actualización" aria-pressed="false">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <rect x="3" y="2" width="4" height="12" rx="1"/><rect x="9" y="2" width="4" height="12" rx="1"/>
+              </svg>
+            </button>
+            <select class="refresh-select" id="refresh-select" aria-label="Intervalo de actualización">
+              <option value="1000">1 s</option>
+              <option value="2000" selected>2 s</option>
+              <option value="5000">5 s</option>
+              <option value="10000">10 s</option>
+              <option value="30000">30 s</option>
+            </select>
             <div class="pill" id="server-pill" role="status" aria-live="polite">
               <span class="pill-dot" id="pill-dot" aria-hidden="true"></span>
               <span id="pill-label">API</span>

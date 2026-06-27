@@ -47,6 +47,7 @@ except Exception:
 
 BASE_DIR = Path(__file__).resolve().parent
 WEB_DIR = BASE_DIR / "web"
+HISTORY_FILE = BASE_DIR / "jellyfin_monitor_history.json"
 HISTORY_POINTS = 90
 EXPORT_MAXLEN = 1800  # ~60 min a 2 s por poll
 
@@ -200,7 +201,10 @@ class MetricsCollector:
         self.last_success: str | None = None
         self._prev_session_keys: dict[str, str] = {}
         self.server_info: dict[str, Any] = {}
+        self.refresh_ms: int = REFRESH_MS
+        self._poll_count: int = 0
         self.jf_proc = find_jellyfin_process()
+        self._load_history()
         self.prev_time = time.perf_counter()
         self.prev_disk = psutil.disk_io_counters()
         self.prev_net = psutil.net_io_counters()
@@ -254,11 +258,13 @@ class MetricsCollector:
                 "transcoding": jellyfin["counts"]["transcoding"],
             })
 
-            return {
+            self._poll_count += 1
+            poll_count = self._poll_count
+            result = {
                 "config": {
                     "url": JF_URL,
                     "apiKeyConfigured": bool(API_KEY),
-                    "refreshMs": REFRESH_MS,
+                    "refreshMs": self.refresh_ms,
                     "mediaPath": str(MEDIA_PATH),
                     "monitorPort": SERVER_PORT,
                 },
@@ -274,6 +280,11 @@ class MetricsCollector:
                 "lastSuccess": self.last_success,
                 "server": self.server_info,
             }
+
+        if poll_count % 30 == 0:
+            threading.Thread(target=self._save_history, daemon=True).start()
+
+        return result
 
     def _system_metrics(self) -> dict[str, Any]:
         current_time = time.perf_counter()
@@ -689,6 +700,29 @@ class MetricsCollector:
             alerts.append(f"GPU caliente: {gpu['temp']['label']}.")
         return alerts
 
+    def _load_history(self) -> None:
+        try:
+            if not HISTORY_FILE.exists():
+                return
+            data = json.loads(HISTORY_FILE.read_text(encoding="utf-8"))
+            cutoff = time.time() - 7200  # descartar datos de más de 2 horas
+            for row in data.get("export_log") or []:
+                if isinstance(row, dict) and row.get("ts", 0) >= cutoff:
+                    self.export_log.append(row)
+        except Exception:
+            pass
+
+    def _save_history(self) -> None:
+        try:
+            with self.lock:
+                rows = list(self.export_log)
+            HISTORY_FILE.write_text(
+                json.dumps({"export_log": rows}, ensure_ascii=False),
+                encoding="utf-8",
+            )
+        except Exception:
+            pass
+
     def _log(self, source: str, message: str, throttle_seconds: int = 5) -> None:
         key = f"{source}:{message}"
         now = time.time()
@@ -740,6 +774,20 @@ class MonitorHandler(BaseHTTPRequestHandler):
             self._send_file(resolved)
         else:
             self.send_error(HTTPStatus.NOT_FOUND)
+
+    def do_POST(self) -> None:
+        parsed = urlparse(self.path)
+        if parsed.path == "/api/config":
+            try:
+                length = max(0, int(self.headers.get("Content-Length", 0)))
+                body = json.loads(self.rfile.read(length).decode("utf-8"))
+                if "refreshMs" in body:
+                    collector.refresh_ms = max(1000, min(int(body["refreshMs"]), 30000))
+                self._send_json({"ok": True, "refreshMs": collector.refresh_ms})
+            except Exception:
+                self.send_error(HTTPStatus.BAD_REQUEST)
+            return
+        self.send_error(HTTPStatus.NOT_FOUND)
 
     def log_message(self, format: str, *args: Any) -> None:
         return
@@ -887,6 +935,8 @@ def main() -> None:
         print("\nCerrando Jellyfin Monitor...")
     finally:
         server.server_close()
+        collector._save_history()
+        print("Historial guardado.")
 
 
 if __name__ == "__main__":
