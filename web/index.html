@@ -13,7 +13,7 @@
     <div class="shell">
       <aside class="sidebar">
         <div class="brand">
-          <div class="brand-mark">JM</div>
+          <div class="brand-mark" aria-hidden="true">JM</div>
           <div>
             <h1>Jellyfin Monitor</h1>
             <p id="server-url">Conectando...</p>
@@ -23,28 +23,28 @@
         <div class="sidebar-divider"></div>
 
         <nav class="nav" aria-label="Secciones">
-          <button class="nav-btn active" data-view="overview">
+          <button class="nav-btn active" data-view="overview" aria-current="page">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
             Resumen
           </button>
-          <button class="nav-btn" data-view="sessions">
+          <button class="nav-btn" data-view="sessions" aria-current="false">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="1" y="2" width="14" height="3" rx="1.5"/><rect x="1" y="7" width="14" height="3" rx="1.5"/><rect x="1" y="12" width="14" height="3" rx="1.5"/></svg>
             Sesiones
           </button>
-          <button class="nav-btn" data-view="system">
+          <button class="nav-btn" data-view="system" aria-current="false">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="3" width="10" height="10" rx="2"/><rect x="6.4" y="6.4" width="3.2" height="3.2" rx="0.6" fill="currentColor" stroke="none"/></svg>
             Sistema
           </button>
-          <button class="nav-btn" data-view="status">
+          <button class="nav-btn" data-view="status" aria-current="false">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="2.3" fill="currentColor" stroke="none"/></svg>
             Estado
           </button>
         </nav>
 
-        <div class="side-status">
-          <div class="side-status-label">Servidor</div>
+        <div class="side-status" role="status" aria-live="polite" aria-label="Estado del servidor">
+          <div class="side-status-label" aria-hidden="true">Servidor</div>
           <div class="side-status-row">
-            <span class="status-dot" id="sidebar-dot"></span>
+            <span class="status-dot" id="sidebar-dot" aria-hidden="true"></span>
             <span class="side-status-text" id="sidebar-status-text">Conectando</span>
           </div>
           <div class="side-status-version mono" id="sidebar-version">--</div>
@@ -58,18 +58,18 @@
             <p class="topbar-sub" id="view-subtitle">Consumo del proceso Jellyfin en tiempo real</p>
           </div>
           <div class="top-actions">
-            <div class="pill" id="server-pill">
-              <span class="pill-dot" id="pill-dot"></span>
+            <div class="pill" id="server-pill" role="status" aria-live="polite">
+              <span class="pill-dot" id="pill-dot" aria-hidden="true"></span>
               <span id="pill-label">API</span>
             </div>
             <div class="clock-wrap">
               <span class="clock-label">Hora</span>
-              <span class="clock mono" id="clock">--:--:--</span>
+              <span class="clock mono" id="clock" aria-live="off">--:--:--</span>
             </div>
           </div>
         </header>
 
-        <section class="view active" id="overview-view">
+        <section class="view active" id="overview-view" aria-labelledby="view-title" aria-hidden="false">
           <div class="cards" id="summary-cards"></div>
           <div class="cards" id="metric-cards"></div>
 
@@ -79,58 +79,58 @@
             <article class="panel session-panel">
               <div class="session-panel-head">
                 <span class="panel-title">Sesión activa</span>
-                <div class="carousel-nav" id="carousel-nav" style="display:none">
-                  <button class="carousel-btn" id="carousel-prev">&#8249;</button>
-                  <span class="carousel-pos mono" id="carousel-pos">1 / 1</span>
-                  <button class="carousel-btn" id="carousel-next">&#8250;</button>
+                <div class="carousel-nav" id="carousel-nav" style="display:none" role="group" aria-label="Navegación de sesiones">
+                  <button class="carousel-btn" id="carousel-prev" aria-label="Sesión anterior">&#8249;</button>
+                  <span class="carousel-pos mono" id="carousel-pos" aria-live="polite" aria-atomic="true">1 / 1</span>
+                  <button class="carousel-btn" id="carousel-next" aria-label="Sesión siguiente">&#8250;</button>
                 </div>
-                <span class="session-state-badge" id="session-state-badge"></span>
+                <span class="session-state-badge" id="session-state-badge" aria-live="polite"></span>
               </div>
-              <div id="featured-session" class="featured-empty">Sin sesiones activas</div>
+              <div id="featured-session" class="featured-empty" aria-live="polite">Sin sesiones activas</div>
             </article>
           </div>
         </section>
 
-        <section class="view" id="sessions-view">
+        <section class="view" id="sessions-view" aria-labelledby="view-title" aria-hidden="true">
           <div class="sessions-bar">
-            <span class="status-dot green-dot"></span>
-            <span id="sessions-summary" class="sessions-summary-text">Sin datos</span>
+            <span class="status-dot green-dot" aria-hidden="true"></span>
+            <span id="sessions-summary" class="sessions-summary-text" aria-live="polite">Sin datos</span>
           </div>
-          <div id="sessions-list" class="session-list"></div>
+          <div id="sessions-list" class="session-list" aria-live="polite"></div>
         </section>
 
-        <section class="view" id="system-view">
+        <section class="view" id="system-view" aria-labelledby="view-title" aria-hidden="true">
           <div class="grid two">
             <article class="panel accent-panel">
               <div class="accent-panel-head">
-                <span class="accent-bar" style="background:var(--purple)"></span>
+                <span class="accent-bar" style="background:var(--purple)" aria-hidden="true"></span>
                 <div>
                   <div class="panel-title">Host · Sistema</div>
                   <div class="panel-sub">Métricas globales del equipo</div>
                 </div>
               </div>
-              <div class="metric-list" id="system-metrics"></div>
+              <div class="metric-list" id="system-metrics" aria-live="polite"></div>
             </article>
             <article class="panel accent-panel">
               <div class="accent-panel-head">
-                <span class="accent-bar" style="background:var(--teal)"></span>
+                <span class="accent-bar" style="background:var(--teal)" aria-hidden="true"></span>
                 <div class="flex-grow">
                   <div class="panel-title">Proceso Jellyfin</div>
                   <div class="panel-sub">Solo el proceso</div>
                 </div>
                 <span class="process-badge">no incluye el sistema</span>
               </div>
-              <div class="metric-list" id="server-metrics"></div>
+              <div class="metric-list" id="server-metrics" aria-live="polite"></div>
             </article>
           </div>
         </section>
 
-        <section class="view" id="status-view">
-          <div class="health-chips" id="health-chips"></div>
+        <section class="view" id="status-view" aria-labelledby="view-title" aria-hidden="true">
+          <div class="health-chips" id="health-chips" aria-live="polite"></div>
           <div class="export-bar">
             <span class="export-label">Exportar historial</span>
-            <a class="export-btn" href="/api/export/csv?minutes=30" download>↓ 30 min</a>
-            <a class="export-btn" href="/api/export/csv?minutes=60" download>↓ 60 min</a>
+            <a class="export-btn" href="/api/export/csv?minutes=30" download aria-label="Descargar historial de los últimos 30 minutos en CSV">↓ 30 min</a>
+            <a class="export-btn" href="/api/export/csv?minutes=60" download aria-label="Descargar historial de los últimos 60 minutos en CSV">↓ 60 min</a>
           </div>
           <div class="grid status-grid">
             <article class="panel">
@@ -139,11 +139,11 @@
             </article>
             <article class="panel">
               <div class="panel-head-simple">Alertas</div>
-              <div id="alerts-list" class="alert-list"></div>
+              <div id="alerts-list" class="alert-list" role="status" aria-live="polite" aria-label="Alertas del sistema"></div>
             </article>
             <article class="panel events-panel">
               <div class="panel-head-simple">Eventos recientes</div>
-              <div id="events-list" class="events-list"></div>
+              <div id="events-list" class="events-list" aria-live="polite" aria-label="Eventos recientes"></div>
             </article>
           </div>
         </section>

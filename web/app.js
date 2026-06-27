@@ -57,8 +57,16 @@ function toneColor(tone) {
 
 function setView(view) {
   state.view = view;
-  $$(".nav-btn").forEach((btn) => btn.classList.toggle("active", btn.dataset.view === view));
-  $$(".view").forEach((sec) => sec.classList.toggle("active", sec.id === `${view}-view`));
+  $$(".nav-btn").forEach((btn) => {
+    const active = btn.dataset.view === view;
+    btn.classList.toggle("active", active);
+    btn.setAttribute("aria-current", active ? "page" : "false");
+  });
+  $$(".view").forEach((sec) => {
+    const active = sec.id === `${view}-view`;
+    sec.classList.toggle("active", active);
+    sec.setAttribute("aria-hidden", active ? "false" : "true");
+  });
   const meta = {
     overview: ["Resumen",  "Consumo del proceso Jellyfin en tiempo real"],
     sessions: ["Sesiones", "Reproducciones activas en el servidor"],
@@ -457,7 +465,7 @@ function buildChartPanels() {
           </div>
           <span class="chart-current mono" id="${key}-current" style="color:${cfg.color}">--</span>
         </div>
-        <canvas data-chart="${key}"></canvas>
+        <canvas data-chart="${key}" role="img" aria-label="${escapeHtml(cfg.title)} — historial"></canvas>
       </div>`,
     )
     .join("");
