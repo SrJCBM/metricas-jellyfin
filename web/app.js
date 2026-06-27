@@ -8,18 +8,18 @@ const state = {
 };
 
 const charts = {
-  jfCpu:      { title: "Jellyfin · CPU",     sub: "proceso · % de núcleo",   unit: "%",    color: "#4fd1b5", floorMax: 100 },
-  jfRamMb:    { title: "Jellyfin · RAM",     sub: "proceso · memoria RSS",   unit: " MB",  color: "#a78bfa" },
-  jfDiskRead: { title: "Jellyfin · Lectura", sub: "i/o del proceso",         unit: " MB/s",color: "#4fd1b5" },
-  streamMbps: { title: "Bitrate sesiones",   sub: "salida total a clientes", unit: " Mbps",color: "#a78bfa" },
+  jfCpu:      { title: "Jellyfin · CPU",     sub: "proceso · % de núcleo",   unit: "%",    color: "#4a9e70", floorMax: 100 },
+  jfRamMb:    { title: "Jellyfin · RAM",     sub: "proceso · memoria RSS",   unit: " MB",  color: "#a078f0" },
+  jfDiskRead: { title: "Jellyfin · Lectura", sub: "i/o del proceso",         unit: " MB/s",color: "#4a9e70" },
+  streamMbps: { title: "Bitrate sesiones",   sub: "salida total a clientes", unit: " Mbps",color: "#a078f0" },
 };
 
 // sparkline config for metric cards (indices 4–7 of data.cards)
 const metricSparklines = [
-  { key: "jfCpu",      color: "#4fd1b5" },
-  { key: null,         color: "#a78bfa" },
-  { key: "jfDiskRead", color: "#4fd1b5" },
-  { key: "streamMbps", color: "#a78bfa" },
+  { key: "jfCpu",      color: "#4a9e70" },
+  { key: null,         color: "#a078f0" },
+  { key: "jfDiskRead", color: "#4a9e70" },
+  { key: "streamMbps", color: "#a078f0" },
 ];
 
 const $ = (s) => document.querySelector(s);

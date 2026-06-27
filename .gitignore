@@ -13,6 +13,7 @@ __pycache__/
 
 # Herramientas internas y artefactos de trabajo
 .claude/
+.agents/
 .playwright-mcp/
 Claude design/
 web/CLAUDE.md
